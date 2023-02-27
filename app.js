@@ -5,13 +5,30 @@ import {
   View,
   TouchableOpacity,
   TextInput,
+  ScrollView
 } from "react-native";
 import { theme } from "./colors";
 
 export default function App() {
     const [working, setWorking] = useState(true);
+    const [text, setText] = useState("");
+    const [toDos, setToDos] = useState({});
+
     const travel =()=> setWorking(false);
     const work =()=> setWorking(true);
+    const onChangeText =(payload)=> setText(payload);
+
+    const addToDo=()=> {
+        if (text === "") {
+            return;
+        }
+        const newToDos = Object.assign({}, toDos, 
+            //Object.assign(목표, 대상객체, {키})
+            { [Date.now()] : { text, work : working},
+        });
+        setToDos(newToDos);
+        setText("");
+    }
     return(
         <View style={styles.container}>
             <View style={styles.header}>
@@ -24,8 +41,19 @@ export default function App() {
             </View>
             <View>
                 <TextInput
+                    onSubmitEditing={addToDo}
+                    onChangeText={onChangeText}
+                    value={text}
+                    returnKeyType="done"
                     placeholder={working ? "Add a To Do" : "Where do you want to go?"}
                     style={styles.input}/>
+                <ScrollView>{
+                    Object.keys(toDos).map((key=> (
+                        <View style={styles.toDo} key={key}>
+                            <Text style={styles.toDoText}>{toDos[key].text}</Text>
+                        </View>
+                        )))}
+                </ScrollView>
             </View>
         </View>
     );
@@ -53,5 +81,18 @@ const styles = StyleSheet.create({
         borderRadius: 30,
         marginTop: 20,
         fontSize: 18,
+        marginBottom: 20,
       },
+      toDo : {
+        backgroundColor : theme.grey,
+        marginBottom: 10,
+        paddingVertical: 20,
+        paddingHorizontal: 20,
+        borderRadius: 15,
+      },
+      toDoText : {
+        color : "white",
+        fontSize: 16,
+        fontWeight: "500",
+      }
 });
