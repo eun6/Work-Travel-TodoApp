@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,25 +8,43 @@ import {
   ScrollView
 } from "react-native";
 import { theme } from "./colors";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const STORAGE_KEY = "@toDos";
 
 export default function App() {
     const [working, setWorking] = useState(true);
     const [text, setText] = useState("");
     const [toDos, setToDos] = useState({});
+    useEffect(()=> {
+        loadToDos();
+    }, []);
 
     const travel =()=> setWorking(false);
     const work =()=> setWorking(true);
     const onChangeText =(payload)=> setText(payload);
 
-    const addToDo=()=> {
+    //local storage 역할, string으로 바꿔서 저장하기
+    const saveToDos = async (toSave) => {
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    };
+    //작성된 toDo 있다면 object로 바꿔서 불러오기
+    const loadToDos = async()=> {
+        const s = await AsyncStorage.getItem(STORAGE_KEY);
+        setToDos(JSON.parse(s));
+    }
+    
+
+    const addToDo = async()=> {
         if (text === "") {
             return;
         }
         const newToDos = Object.assign({}, toDos, 
             //Object.assign(목표, 대상객체, {키})
-            { [Date.now()] : { text, work : working},
+            { [Date.now()] : { text, working},
         });
         setToDos(newToDos);
+        await saveToDos(newToDos);
         setText("");
     }
     return(
@@ -49,9 +67,10 @@ export default function App() {
                     style={styles.input}/>
                 <ScrollView>{
                     Object.keys(toDos).map((key=> (
+                        toDos[key].working === working ? (
                         <View style={styles.toDo} key={key}>
                             <Text style={styles.toDoText}>{toDos[key].text}</Text>
-                        </View>
+                        </View>) : null
                         )))}
                 </ScrollView>
             </View>
