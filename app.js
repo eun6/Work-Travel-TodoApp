@@ -5,10 +5,12 @@ import {
   View,
   TouchableOpacity,
   TextInput,
-  ScrollView
+  ScrollView,
+  Alert,
 } from "react-native";
 import { theme } from "./colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from "react-native-vector-icons/dist/Fontisto";
 
 const STORAGE_KEY = "@toDos";
 
@@ -34,7 +36,7 @@ export default function App() {
         setToDos(JSON.parse(s));
     }
     
-
+    //Todo 추가
     const addToDo = async()=> {
         if (text === "") {
             return;
@@ -47,6 +49,22 @@ export default function App() {
         await saveToDos(newToDos);
         setText("");
     }
+    
+    //Todo 삭제
+    const deleteToDo = async(key) => {
+        Alert.alert("Delete To Do?", "Are you sure?", [
+            {text : "Cancel"},
+            {text : "I'm Sure", onPress:()=> {
+                //ES6 문법을 활용해 object.assign과 똑같은 효과 내기
+                const newToDos = {...toDos}
+                delete newToDos[key];
+                setToDos(newToDos);
+                saveToDos(newToDos);
+            }},
+        ]);
+
+        
+    }
     return(
         <View style={styles.container}>
             <View style={styles.header}>
@@ -54,7 +72,7 @@ export default function App() {
                     <Text style={{...styles.btnText, color: working ? "white" : theme.grey}}>Work</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={travel}>
-                    <Text style={{...styles.btnText, color: !working ? "white" : theme.grey}}>Travel</Text>
+                    <Text style={{...styles.btnText, color: !working ? "white" : theme.grey}}>Travel</Text>                    
                 </TouchableOpacity>
             </View>
             <View>
@@ -62,7 +80,7 @@ export default function App() {
                     onSubmitEditing={addToDo}
                     onChangeText={onChangeText}
                     value={text}
-                    returnKeyType="done"
+                    returnKeyType="default"
                     placeholder={working ? "Add a To Do" : "Where do you want to go?"}
                     style={styles.input}/>
                 <ScrollView>{
@@ -70,6 +88,9 @@ export default function App() {
                         toDos[key].working === working ? (
                         <View style={styles.toDo} key={key}>
                             <Text style={styles.toDoText}>{toDos[key].text}</Text>
+                            <TouchableOpacity onPress={()=>deleteToDo(key)}>
+                                <Icon name="trash" size={20} color={theme.toDoBg}/>
+                            </TouchableOpacity>
                         </View>) : null
                         )))}
                 </ScrollView>
@@ -108,6 +129,9 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
         paddingHorizontal: 20,
         borderRadius: 15,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
       },
       toDoText : {
         color : "white",
