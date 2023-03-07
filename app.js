@@ -33,7 +33,9 @@ export default function App() {
     //작성된 toDo 있다면 object로 바꿔서 불러오기
     const loadToDos = async()=> {
         const s = await AsyncStorage.getItem(STORAGE_KEY);
-        setToDos(JSON.parse(s));
+        if (s) {
+            setToDos(JSON.parse(s));
+        }
     }
     
     //Todo 추가
