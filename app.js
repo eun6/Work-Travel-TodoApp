@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   Alert,
+  Platform,
 } from "react-native";
 import { theme } from "./colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -54,27 +55,37 @@ export default function App() {
     
     //Todo 삭제
     const deleteToDo = async(key) => {
-        Alert.alert("Delete To Do?", "Are you sure?", [
-            {text : "Cancel"},
-            {text : "I'm Sure", onPress:()=> {
-                //ES6 문법을 활용해 object.assign과 똑같은 효과 내기
+        if (Platform.OS === "web") {
+            const ok = confirm("Do you want to delete this To Do?");
+            if (ok) {
                 const newToDos = {...toDos}
                 delete newToDos[key];
                 setToDos(newToDos);
                 saveToDos(newToDos);
-            }},
-        ]);
-
-        
+            }
+        } else {
+            Alert.alert("Delete To Do?", "Are you sure?", [
+                {text : "Cancel"},
+                {text : "I'm Sure", onPress:()=> {
+                    //ES6 문법을 활용해 object.assign과 똑같은 효과 내기
+                    const newToDos = {...toDos}
+                    delete newToDos[key];
+                    setToDos(newToDos);
+                    saveToDos(newToDos);
+                }},
+            ]);
+        }
     }
     return(
         <View style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={work}>
-                    <Text style={{...styles.btnText, color: working ? "white" : theme.grey}}>Work</Text>
+                    <Text style={{fontSize : 38, fontWeight : "600",
+                        color: working ? "white" : theme.grey}}>Work</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={travel}>
-                    <Text style={{...styles.btnText, color: !working ? "white" : theme.grey}}>Travel</Text>                    
+                    <Text style={{fontSize : 38, fontWeight : "600",
+                    color: !working ? "white" : theme.grey}}>Travel</Text>                    
                 </TouchableOpacity>
             </View>
             <View>
@@ -111,10 +122,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         flexDirection: "row",
         marginTop: 100,
-    },
-    btnText : {
-        fontSize : 38,
-        fontWeight : "600"
     },
     input : {
         backgroundColor: "white",
